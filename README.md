@@ -61,7 +61,7 @@ src/main/java/com/teachermanagement/teacher_management/
 | Tool                            | Version                      |
 | ------------------------------- | ---------------------------- |
 | Java (JDK)                      | 17 or later                  |
-| Maven                           | 3.8 or later                 |
+| Maven                           | 3.6.3 or later               |
 | Git                             | any recent version           |
 | PostgreSQL                      | 14+ (production only)        |
 | Docker _(optional)_             | for containerized PostgreSQL |
