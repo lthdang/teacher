@@ -23,6 +23,8 @@ import org.springframework.web.context.WebApplicationContext;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.teachermanagement.teacher_management.dto.admin.AdminLoginRequest;
+import com.teachermanagement.teacher_management.dto.admin.AdminRequestDTO;
+import com.teachermanagement.teacher_management.repository.IAdminRepository;
 import com.teachermanagement.teacher_management.security.JwtService;
 
 @SpringBootTest
@@ -37,6 +39,9 @@ class AdminControllerTest {
 
     @Autowired
     private JwtService jwtService;
+
+    @Autowired
+    private IAdminRepository adminRepository;
 
     private MockMvc mockMvc;
     private String validToken;
@@ -89,5 +94,66 @@ class AdminControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
+    }
+
+    @Test
+    @DisplayName("POST /api/admin/register - Valid request should create admin and return 200 OK")
+    void testRegisterAdminSuccess() throws Exception {
+        String uniqueEmail = "newadmin_" + UUID.randomUUID() + "@test.com";
+        AdminRequestDTO request = AdminRequestDTO.builder()
+                .email(uniqueEmail)
+                .surname("Doe")
+                .firstName("John")
+                .password("SecurePass123!")
+                .build();
+
+        mockMvc.perform(post("/api/admin/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.email").value(uniqueEmail))
+                .andExpect(jsonPath("$.surname").value("Doe"))
+                .andExpect(jsonPath("$.firstName").value("John"));
+    }
+
+    @Test
+    @DisplayName("POST /api/admin/register - Invalid data should return 400 Bad Request")
+    void testRegisterAdminInvalidData() throws Exception {
+        AdminRequestDTO request = AdminRequestDTO.builder()
+                .email("invalid-email")
+                .surname("")
+                .firstName("")
+                .password("123")
+                .build();
+
+        mockMvc.perform(post("/api/admin/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    @DisplayName("POST /api/admin/register - Duplicate email should return 400 Bad Request")
+    void testRegisterAdminDuplicateEmail() throws Exception {
+        String email = "duplicate_" + UUID.randomUUID() + "@test.com";
+        AdminRequestDTO request = AdminRequestDTO.builder()
+                .email(email)
+                .surname("Smith")
+                .firstName("Alice")
+                .password("Password123!")
+                .build();
+
+        // First registration
+        mockMvc.perform(post("/api/admin/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isOk());
+
+        // Duplicate registration attempt
+        mockMvc.perform(post("/api/admin/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("ERROR_EMAIL_EXISTED"));
     }
 }

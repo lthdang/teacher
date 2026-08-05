@@ -15,5 +15,5 @@ public class LoginResponse {
 
     private String token;
     private OffsetDateTime expiresAt;
-    private AdminResponseDTO admin;
+    private AdminDTO admin;
 }

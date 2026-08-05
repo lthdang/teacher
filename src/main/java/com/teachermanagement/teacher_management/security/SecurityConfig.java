@@ -44,8 +44,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 // Allow all CORS OPTIONS preflight requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                // Admin login is public
+                // Admin login and registration are public
                 .requestMatchers(HttpMethod.POST, "/api/admin/login").permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/admin/register").permitAll()
                 // All other admin endpoints require a valid JWT
                 .requestMatchers("/api/admin/**").authenticated()
                 // Everything else is open (other future routes)
