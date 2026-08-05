@@ -4,13 +4,23 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.UUID;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.teachermanagement.teacher_management.dto.admin.AdminLoginRequest;
-import com.teachermanagement.teacher_management.dto.admin.AdminResponseDTO;
+import com.teachermanagement.teacher_management.dto.admin.AdminRequestDTO;
+
+import com.teachermanagement.teacher_management.common.constant.ErrorCode;
+import com.teachermanagement.teacher_management.common.exception.BadRequestException;
+import com.teachermanagement.teacher_management.common.service.BaseService;
+import com.teachermanagement.teacher_management.common.util.DTOMapper;
+import com.teachermanagement.teacher_management.dto.admin.AdminDTO;
 import com.teachermanagement.teacher_management.dto.admin.AdminUpdateRequest;
 import com.teachermanagement.teacher_management.dto.admin.ChangePasswordRequest;
 import com.teachermanagement.teacher_management.dto.admin.LoginResponse;
@@ -22,11 +32,32 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class AdminService {
+public class AdminService extends BaseService<Admin, UUID>{
 
     private final IAdminRepository adminRepository;
     private final JwtService jwtService;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final DTOMapper dtoMapper;
+
+    @Override
+    public Optional<Admin> findById(UUID id) {
+        return adminRepository.findById(id);
+    }
+
+    @Override
+    public List<Admin> findAllById(Collection<UUID> ids) {
+        return adminRepository.findAllById(ids);
+    }
+
+    @Override
+    public String notFoundByIdErrorCode() {
+        return ErrorCode.ERROR_USER_NOT_FOUND;
+    }
+
+    @Override
+    public String notFoundByIdsErrorCode() {
+        return ErrorCode.ERROR_SOME_USERS_NOT_FOUND;
+    }
 
     // -------------------------------------------------------------------------
     // Login
@@ -51,7 +82,7 @@ public class AdminService {
         return LoginResponse.builder()
                 .token(token)
                 .expiresAt(expiresAt)
-                .admin(toResponseDTO(admin))
+                .admin(dtoMapper.map(admin, AdminDTO.class))
                 .build();
     }
 
@@ -70,9 +101,8 @@ public class AdminService {
     // Get profile
     // -------------------------------------------------------------------------
 
-    public AdminResponseDTO getProfile(UUID adminId) {
-        Admin admin = findAdminById(adminId);
-        return toResponseDTO(admin);
+    public Admin getProfile(UUID adminId) {
+        return findByIdOrThrow(adminId);
     }
 
     // -------------------------------------------------------------------------
@@ -80,8 +110,8 @@ public class AdminService {
     // -------------------------------------------------------------------------
 
     @Transactional
-    public AdminResponseDTO updateProfile(UUID adminId, AdminUpdateRequest request) {
-        Admin admin = findAdminById(adminId);
+    public Admin updateProfile(UUID adminId, AdminUpdateRequest request) {
+        Admin admin = findByIdOrThrow(adminId);
 
         if (request.getSurname() != null) {
             admin.setSurname(request.getSurname());
@@ -94,7 +124,7 @@ public class AdminService {
         }
         admin.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
 
-        return toResponseDTO(adminRepository.save(admin));
+        return adminRepository.save(admin);
     }
 
     // -------------------------------------------------------------------------
@@ -103,10 +133,10 @@ public class AdminService {
 
     @Transactional
     public void changePassword(UUID adminId, ChangePasswordRequest request) {
-        Admin admin = findAdminById(adminId);
+        Admin admin = findByIdOrThrow(adminId);
 
         if (!passwordEncoder.matches(request.getCurrentPassword(), admin.getPassword())) {
-            throw new IllegalArgumentException("Current password is incorrect");
+            throw new BadRequestException(ErrorCode.ERROR_PASSWORD_INCORRECT);
         }
 
         admin.setPassword(passwordEncoder.encode(request.getNewPassword()));
@@ -115,24 +145,25 @@ public class AdminService {
     }
 
     // -------------------------------------------------------------------------
-    // Helpers
+    // Register Admin
     // -------------------------------------------------------------------------
 
-    private Admin findAdminById(UUID adminId) {
-        return adminRepository.findById(adminId)
-                .orElseThrow(() -> new IllegalStateException("Admin not found"));
-    }
+    @Transactional
+    public Admin register(AdminRequestDTO request) {
+        if (adminRepository.existsByEmail(request.getEmail())) {
+            throw new BadRequestException(ErrorCode.ERROR_EMAIL_EXISTED);
+        }
 
-    private AdminResponseDTO toResponseDTO(Admin admin) {
-        return AdminResponseDTO.builder()
-                .id(admin.getId())
-                .email(admin.getEmail())
-                .surname(admin.getSurname())
-                .firstName(admin.getFirstName())
-                .avatar(admin.getAvatar())
-                .lastLogin(admin.getLastLogin())
-                .createdAt(admin.getCreatedAt())
-                .updatedAt(admin.getUpdatedAt())
+        OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
+        Admin admin = Admin.builder()
+                .email(request.getEmail())
+                .surname(request.getSurname())
+                .firstName(request.getFirstName())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .build();
+        admin.setCreatedAt(now);
+        admin.setUpdatedAt(now);
+
+        return adminRepository.save(admin);
     }
 }

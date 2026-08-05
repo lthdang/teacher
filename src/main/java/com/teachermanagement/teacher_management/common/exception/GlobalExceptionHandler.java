@@ -106,6 +106,44 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 
+    // Error 400 — Bad Request Exception
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ErrorResponse> handleBadRequestException(
+            BadRequestException ex,
+            HttpServletRequest request) {
+
+        String message = (ex.getCode() != null && !ex.getCode().isEmpty()) ? ex.getCode() : ex.getMessage();
+
+        ErrorResponse error = ErrorResponse.builder()
+                .status(400)
+                .error("Bad Request")
+                .message(message)
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    }
+
+    // Error 404 — Not Found Exception
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFoundException(
+            NotFoundException ex,
+            HttpServletRequest request) {
+
+        String message = (ex.getCode() != null && !ex.getCode().isEmpty()) ? ex.getCode() : ex.getMessage();
+
+        ErrorResponse error = ErrorResponse.builder()
+                .status(404)
+                .error("Not Found")
+                .message(message)
+                .path(request.getRequestURI())
+                .timestamp(LocalDateTime.now())
+                .build();
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    }
+
     // Catch error 500 — unexpected server error
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleGeneralException(

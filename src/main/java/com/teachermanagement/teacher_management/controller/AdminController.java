@@ -11,11 +11,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.teachermanagement.teacher_management.common.util.DTOMapper;
 import com.teachermanagement.teacher_management.dto.admin.AdminLoginRequest;
-import com.teachermanagement.teacher_management.dto.admin.AdminResponseDTO;
+import com.teachermanagement.teacher_management.dto.admin.AdminRequestDTO;
+import com.teachermanagement.teacher_management.dto.admin.AdminDTO;
 import com.teachermanagement.teacher_management.dto.admin.AdminUpdateRequest;
 import com.teachermanagement.teacher_management.dto.admin.ChangePasswordRequest;
 import com.teachermanagement.teacher_management.dto.admin.LoginResponse;
+import com.teachermanagement.teacher_management.entity.Admin;
 import com.teachermanagement.teacher_management.service.AdminService;
 
 import jakarta.validation.Valid;
@@ -27,7 +30,7 @@ import lombok.RequiredArgsConstructor;
 public class AdminController {
 
     private final AdminService adminService;
-
+    private final DTOMapper dtoMapper;
     /**
      * POST /api/admin/login
      * Public endpoint — authenticates the admin and returns a JWT access token.
@@ -54,10 +57,10 @@ public class AdminController {
      * Protected — returns the authenticated admin's profile.
      */
     @GetMapping("/profile")
-    public ResponseEntity<AdminResponseDTO> getProfile(Authentication authentication) {
+    public AdminDTO getProfile(Authentication authentication) {
         UUID adminId = UUID.fromString(authentication.getName());
-        AdminResponseDTO response = adminService.getProfile(adminId);
-        return ResponseEntity.ok(response);
+        Admin response = adminService.getProfile(adminId);
+        return dtoMapper.map(response, AdminDTO.class);
     }
 
     /**
@@ -65,12 +68,22 @@ public class AdminController {
      * Protected — updates surname, first_name, and/or avatar.
      */
     @PutMapping("/profile")
-    public ResponseEntity<AdminResponseDTO> updateProfile(
+    public AdminDTO updateProfile(
             Authentication authentication,
             @RequestBody AdminUpdateRequest request) {
         UUID adminId = UUID.fromString(authentication.getName());
-        AdminResponseDTO response = adminService.updateProfile(adminId, request);
-        return ResponseEntity.ok(response);
+        Admin response = adminService.updateProfile(adminId, request);
+        return dtoMapper.map(response, AdminDTO.class);
+    }
+
+    /**
+     * POST /api/admin/register
+     * Public endpoint — registers a new admin and returns saved admin details.
+     */
+    @PostMapping("/register")
+    public AdminDTO register(@Valid @RequestBody AdminRequestDTO request) {
+        Admin response = adminService.register(request);
+        return dtoMapper.map(response, AdminDTO.class);
     }
 
     /**

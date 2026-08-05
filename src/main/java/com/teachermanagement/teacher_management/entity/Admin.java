@@ -3,12 +3,15 @@ package com.teachermanagement.teacher_management.entity;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.teachermanagement.teacher_management.common.model.BaseEntity;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,13 +23,14 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Admin {
+public class Admin extends BaseEntity<UUID> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
+    @Email
     @Column(name = "email", nullable = false, unique = true, length = 255)
     private String email;
 
@@ -45,9 +49,4 @@ public class Admin {
     @Column(name = "last_login")
     private OffsetDateTime lastLogin;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
 }
