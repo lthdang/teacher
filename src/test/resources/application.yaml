@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: teacher-test
+
+  datasource:
+    url: jdbc:h2:mem:testdb;INIT=CREATE SCHEMA IF NOT EXISTS teacher;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+
+  flyway:
+    enabled: false
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+server:
+  port: 8080
+
+jwt:
+  secret: "changeme-please-use-a-long-random-secret-key-for-hs256-at-least-32-chars"
+  expiration-ms: 86400000
+
+teacher:
+  db:
+    host: localhost
+    port: "5432"
+    name: testdb
+    user: sa
+    password: ""
+    default_schema: teacher
+    url: jdbc:h2:mem:testdb;INIT=CREATE SCHEMA IF NOT EXISTS teacher;DB_CLOSE_DELAY=-1;MODE=PostgreSQL

@@ -1,9 +1,9 @@
 version: "3.9"
 
 services:
-  teach-management-db:
+  teacher-db:
     image: postgres:17
-    container_name: ${COMPOSE_PROJECT_NAME}.teach-management-db
+    container_name: ${COMPOSE_PROJECT_NAME}.teacher-db
     restart: always
     volumes:
       - ./data/postgres:/var/lib/postgresql/data
