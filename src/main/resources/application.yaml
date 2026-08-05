@@ -1,18 +1,18 @@
 spring:
   application:
-    name: teach_management
+    name: teacher
 
   datasource:
-    url: "${teach_management.db.url}"
-    username: "${teach_management.db.user}"
-    password: "${teach_management.db.password}"
+    url: "${teacher.db.url}"
+    username: "${teacher.db.user}"
+    password: "${teacher.db.password}"
     driver-class-name: org.postgresql.Driver
 
   flyway:
     baseline-on-migrate: true
     enabled: true
-    default-schema: "${teach_management.db.default_schema}"
-    schemas: "${teach_management.db.default_schema}"
+    default-schema: "${teacher.db.default_schema}"
+    schemas: "${teacher.db.default_schema}"
     create-schemas: true
     locations: classpath:db/migration
 
@@ -25,7 +25,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         temp:
           use_jdbc_metadata_defaults: false
-        default_schema: "${teach_management.db.default_schema}"
+        default_schema: "${teacher.db.default_schema}"
 
 logging:
   level:
@@ -42,12 +42,12 @@ jwt:
   secret: "${JWT_SECRET:changeme-please-use-a-long-random-secret-key-for-hs256-at-least-32-chars}"
   expiration-ms: 86400000   # 24 hours
 
-teach_management:
+teacher:
   db:
     host: "${POSTGRES_DB_HOST:127.0.0.1}"
     port: "5432"
-    name: "${POSTGRES_DB:teach-management-db}"
+    name: "${POSTGRES_DB:teacher-db}"
     user: "${POSTGRES_USER:root}"
     password: "${POSTGRES_PASSWORD:password}"
-    default_schema: teach_management
-    url: jdbc:postgresql://${teach_management.db.host}:${teach_management.db.port}/${teach_management.db.name}
+    default_schema: teacher
+    url: jdbc:postgresql://${teacher.db.host}:${teacher.db.port}/${teacher.db.name}
