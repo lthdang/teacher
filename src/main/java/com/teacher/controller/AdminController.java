@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.teacher.common.dto.ResponseDTO;
 import com.teacher.common.util.DTOMapper;
 import com.teacher.dto.admin.AdminLoginRequest;
 import com.teacher.dto.admin.AdminRequestDTO;
@@ -32,7 +33,7 @@ public class AdminController {
     private final AdminService adminService;
     private final DTOMapper dtoMapper;
     /**
-     * POST /api/admin/login
+     * POST /api/auth/login
      * Public endpoint — authenticates the admin and returns a JWT access token.
      */
     @PostMapping("/login")
@@ -42,7 +43,7 @@ public class AdminController {
     }
 
     /**
-     * POST /api/admin/logout
+     * POST /api/auth/logout
      * Protected — stateless logout; the client should discard the token.
      */
     @PostMapping("/logout")
@@ -53,7 +54,7 @@ public class AdminController {
     }
 
     /**
-     * GET /api/admin/profile
+     * GET /api/auth/profile
      * Protected — returns the authenticated admin's profile.
      */
     @GetMapping("/profile")
@@ -64,7 +65,7 @@ public class AdminController {
     }
 
     /**
-     * PUT /api/admin/profile
+     * PUT /api/auth/profile
      * Protected — updates surname, first_name, and/or avatar.
      */
     @PutMapping("/profile")
@@ -77,7 +78,7 @@ public class AdminController {
     }
 
     /**
-     * POST /api/admin/register
+     * POST /api/auth/register
      * Public endpoint — registers a new admin and returns saved admin details.
      */
     @PostMapping("/register")
@@ -87,15 +88,15 @@ public class AdminController {
     }
 
     /**
-     * PUT /api/admin/password
+     * PUT /api/auth/password
      * Protected — changes the admin's password after verifying the current one.
      */
     @PutMapping("/password")
-    public ResponseEntity<Void> changePassword(
+    public ResponseEntity<ResponseDTO<?>> changePassword(
             Authentication authentication,
             @Valid @RequestBody ChangePasswordRequest request) {
         UUID adminId = UUID.fromString(authentication.getName());
         adminService.changePassword(adminId, request);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ResponseDTO.success(null, "Password changed successfully."));
     }
 }

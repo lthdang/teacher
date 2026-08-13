@@ -12,15 +12,27 @@ import com.teacher.common.model.CachedTranslation;
 import com.teacher.common.model.CachedTranslationId;
 import com.teacher.common.model.LocaleInformation;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-@RequiredArgsConstructor
+@Component
 public class MessageSourceUtils {
   private final IBaseTranslationCache translationCache;
   private final LocaleInformation currentLocale;
 
+  @Autowired
+  public MessageSourceUtils(
+      @Autowired(required = false) IBaseTranslationCache translationCache,
+      @Autowired(required = false) LocaleInformation currentLocale) {
+    this.translationCache = translationCache;
+    this.currentLocale = currentLocale;
+  }
+
   private String getMessage(
       String code, Map<String, Object> args, Locale locale, String defaultFallbackString) {
+    if (translationCache == null || locale == null) {
+      return defaultFallbackString;
+    }
     // Get the translation value from the cache
     String translationValue =
         translationCache
@@ -58,10 +70,16 @@ public class MessageSourceUtils {
   }
 
   public String getMessage(String code) {
-    return getMessage(code, null, currentLocale.getLocale(), code);
+    Locale locale = (currentLocale != null && currentLocale.getLocale() != null)
+        ? currentLocale.getLocale()
+        : Locale.getDefault();
+    return getMessage(code, null, locale, code);
   }
 
   public String getMessage(String code, Map<String, Object> args) {
-    return getMessage(code, args, currentLocale.getLocale(), code);
+    Locale locale = (currentLocale != null && currentLocale.getLocale() != null)
+        ? currentLocale.getLocale()
+        : Locale.getDefault();
+    return getMessage(code, args, locale, code);
   }
 }
