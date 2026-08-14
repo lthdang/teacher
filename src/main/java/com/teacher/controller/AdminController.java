@@ -1,10 +1,13 @@
 package com.teacher.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,28 +16,33 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.teacher.common.dto.ResponseDTO;
 import com.teacher.common.util.DTOMapper;
+import com.teacher.dto.admin.AdminDTO;
 import com.teacher.dto.admin.AdminLoginRequest;
 import com.teacher.dto.admin.AdminRequestDTO;
-import com.teacher.dto.admin.AdminDTO;
 import com.teacher.dto.admin.AdminUpdateRequest;
 import com.teacher.dto.admin.ChangePasswordRequest;
 import com.teacher.dto.admin.LoginResponse;
+import com.teacher.dto.permission.PermissionDTO;
+import com.teacher.dto.permission.SubAdminDetailDTO;
+import com.teacher.dto.permission.UpdateSubAdminPermissionsRequest;
 import com.teacher.entity.Admin;
+import com.teacher.security.annotation.RequirePermission;
 import com.teacher.service.AdminService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping({"/api/admin", "/api/auth"})
 @RequiredArgsConstructor
 public class AdminController {
 
     private final AdminService adminService;
     private final DTOMapper dtoMapper;
+
     /**
      * POST /api/auth/login
-     * Public endpoint — authenticates the admin and returns a JWT access token.
+     * Public endpoint — authenticates the admin and returns a JWT access token along with permissions.
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody AdminLoginRequest request) {
@@ -69,6 +77,7 @@ public class AdminController {
      * Protected — updates surname, first_name, and/or avatar.
      */
     @PutMapping("/profile")
+    @RequirePermission("permission.update_admin_info")
     public AdminDTO updateProfile(
             Authentication authentication,
             @RequestBody AdminUpdateRequest request) {
@@ -79,12 +88,62 @@ public class AdminController {
 
     /**
      * POST /api/auth/register
-     * Public endpoint — registers a new admin and returns saved admin details.
+     * Protected — requires SUPER_ADMIN (or permission.create_sub_admin).
+     * Registers a new SUB_ADMIN account.
      */
     @PostMapping("/register")
+    @RequirePermission("permission.create_sub_admin")
     public AdminDTO register(@Valid @RequestBody AdminRequestDTO request) {
         Admin response = adminService.register(request);
         return dtoMapper.map(response, AdminDTO.class);
+    }
+
+    /**
+     * GET /api/auth/sub-admins
+     * Protected — requires SUPER_ADMIN (or permission.view_sub_admins).
+     * Returns the list of all SUB_ADMIN accounts.
+     */
+    @GetMapping("/sub-admins")
+    @RequirePermission("permission.view_sub_admins")
+    public List<AdminDTO> getSubAdmins() {
+        List<Admin> subAdmins = adminService.getSubAdmins();
+        return dtoMapper.map(subAdmins, AdminDTO.class);
+    }
+
+    /**
+     * GET /api/auth/sub-admins/{id}
+     * Protected — requires SUPER_ADMIN (or permission.view_sub_admins).
+     * Returns a sub-admin's details along with their assigned permissions.
+     */
+    @GetMapping("/sub-admins/{id}")
+    @RequirePermission("permission.view_sub_admins")
+    public SubAdminDetailDTO getSubAdminDetail(@PathVariable UUID id) {
+        return adminService.getSubAdminDetail(id);
+    }
+
+    /**
+     * DELETE /api/auth/sub-admins/{id}
+     * Protected — requires SUPER_ADMIN (or permission.delete_sub_admin).
+     * Soft deletes a SUB_ADMIN account and removes their permissions.
+     */
+    @DeleteMapping("/sub-admins/{id}")
+    @RequirePermission("permission.delete_sub_admin")
+    public ResponseEntity<ResponseDTO<?>> deleteSubAdmin(@PathVariable UUID id) {
+        adminService.softDeleteSubAdmin(id);
+        return ResponseEntity.ok(ResponseDTO.success(null, "Sub-admin deleted successfully."));
+    }
+
+    /**
+     * PUT /api/auth/sub-admins/{id}/permissions
+     * Protected — requires SUPER_ADMIN (or permission.manage_admin_permissions).
+     * Fully replaces the sub-admin's assigned permission list.
+     */
+    @PutMapping("/sub-admins/{id}/permissions")
+    @RequirePermission("permission.manage_admin_permissions")
+    public List<PermissionDTO> replaceSubAdminPermissions(
+            @PathVariable UUID id,
+            @Valid @RequestBody UpdateSubAdminPermissionsRequest request) {
+        return adminService.replaceSubAdminPermissions(id, request.getPermissionIds());
     }
 
     /**
@@ -92,6 +151,7 @@ public class AdminController {
      * Protected — changes the admin's password after verifying the current one.
      */
     @PutMapping("/password")
+    @RequirePermission("permission.change_password")
     public ResponseEntity<ResponseDTO<?>> changePassword(
             Authentication authentication,
             @Valid @RequestBody ChangePasswordRequest request) {

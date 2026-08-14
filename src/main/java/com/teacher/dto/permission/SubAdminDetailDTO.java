@@ -1,25 +1,23 @@
-package com.teacher.dto.admin;
+package com.teacher.dto.permission;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.teacher.common.interfaces.IModelDTO;
-import com.teacher.entity.Admin;
+import com.teacher.entity.AdminType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import com.teacher.entity.AdminType;
-
 @Data
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(JsonInclude.Include.ALWAYS)
-public class AdminDTO implements IModelDTO<Admin>{
+public class SubAdminDetailDTO {
     private UUID id;
     private String email;
     private String surname;
@@ -29,4 +27,5 @@ public class AdminDTO implements IModelDTO<Admin>{
     private OffsetDateTime lastLogin;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private List<PermissionDTO> permissions;
 }
