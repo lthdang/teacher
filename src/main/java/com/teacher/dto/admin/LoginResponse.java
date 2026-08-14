@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -16,4 +18,5 @@ public class LoginResponse {
     private String token;
     private OffsetDateTime expiresAt;
     private AdminDTO admin;
+    private List<String> permissions;
 }
