@@ -46,7 +46,18 @@ public class Admin extends BaseEntity<UUID> {
     @Column(name = "avatar", length = 500)
     private String avatar;
 
+    @jakarta.persistence.Enumerated(jakarta.persistence.EnumType.STRING)
+    @Column(name = "type", nullable = false, length = 20)
+    @Builder.Default
+    private AdminType type = AdminType.SUB_ADMIN;
+
     @Column(name = "last_login")
     private OffsetDateTime lastLogin;
 
+    @Column(name = "is_deleted", nullable = false)
+    @Builder.Default
+    private Boolean isDeleted = false;
+
+    @Column(name = "deleted_at")
+    private OffsetDateTime deletedAt;
 }
