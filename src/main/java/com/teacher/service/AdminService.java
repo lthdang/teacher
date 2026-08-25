@@ -186,7 +186,7 @@ public class AdminService extends BaseService<Admin, UUID> {
                 .firstName(request.getFirstName())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .type(AdminType.SUB_ADMIN)
-                .isDeleted(false)
+                .isDeleted(Boolean.FALSE)
                 .build();
         admin.setCreatedAt(now);
         admin.setUpdatedAt(now);
@@ -248,7 +248,7 @@ public class AdminService extends BaseService<Admin, UUID> {
             throw new NotFoundException("Sub-admin not found");
         }
 
-        admin.setIsDeleted(true);
+        admin.setIsDeleted(Boolean.TRUE);
         admin.setDeletedAt(OffsetDateTime.now(ZoneOffset.UTC));
         adminRepository.save(admin);
 

@@ -2,7 +2,6 @@ package com.teacher.controller;
 
 import java.util.List;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,13 +57,23 @@ public class PermissionController {
     /**
      * POST /api/permissions
      * Protected — requires SUPER_ADMIN (or permission.create_permission).
-     * Creates one or multiple permissions. Validates for duplicate permission_codes.
+     * Batch creates new permissions.
      */
     @PostMapping
     @RequirePermission("permission.create_permission")
-    public List<PermissionDTO> createPermissions(
-            @Valid @RequestBody List<CreatePermissionItemRequest> requests) {
+    public List<PermissionDTO> createPermissions(@Valid @RequestBody List<CreatePermissionItemRequest> requests) {
         return permissionService.createPermissions(requests);
+    }
+
+    /**
+     * DELETE /api/permissions
+     * Protected — requires SUPER_ADMIN (or permission.delete_permission).
+     * Batch deletes permissions and removes admin associations.
+     */
+    @DeleteMapping
+    @RequirePermission("permission.delete_permission")
+    public DeletePermissionsResponse deletePermissions(@Valid @RequestBody DeletePermissionsRequest request) {
+        return permissionService.deletePermissions(request.getPermissionIds());
     }
 
     /**
@@ -80,16 +89,4 @@ public class PermissionController {
         return permissionService.updatePermission(id, request);
     }
 
-    /**
-     * DELETE /api/permissions
-     * Protected — requires SUPER_ADMIN (or permission.delete_permission).
-     * Deletes one or multiple permissions by ID list, cascade-deleting admin_permission links.
-     */
-    @DeleteMapping
-    @RequirePermission("permission.delete_permission")
-    public ResponseEntity<DeletePermissionsResponse> deletePermissions(
-            @Valid @RequestBody DeletePermissionsRequest request) {
-        DeletePermissionsResponse response = permissionService.deletePermissions(request);
-        return ResponseEntity.ok(response);
-    }
 }

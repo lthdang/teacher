@@ -114,9 +114,9 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("OPTIONS /api/admin/profile - CORS preflight should return 200 OK")
+    @DisplayName("OPTIONS /api/auth/profile - CORS preflight should return 200 OK")
     void testCorsPreflight() throws Exception {
-        mockMvc.perform(options("/api/admin/profile")
+        mockMvc.perform(options("/api/auth/profile")
                 .header("Access-Control-Request-Method", "GET")
                 .header("Origin", "http://localhost:3000"))
                 .andExpect(status().isOk())
@@ -124,29 +124,29 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/admin/profile - Unauthenticated request should return 401 Unauthorized")
+    @DisplayName("GET /api/auth/profile - Unauthenticated request should return 401 Unauthorized")
     void testGetProfileUnauthenticated() throws Exception {
-        mockMvc.perform(get("/api/admin/profile"))
+        mockMvc.perform(get("/api/auth/profile"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401))
                 .andExpect(jsonPath("$.error").value("Unauthorized"));
     }
 
     @Test
-    @DisplayName("GET /api/admin/profile - Request with invalid token should return 401 Unauthorized")
+    @DisplayName("GET /api/auth/profile - Request with invalid token should return 401 Unauthorized")
     void testGetProfileInvalidToken() throws Exception {
-        mockMvc.perform(get("/api/admin/profile")
+        mockMvc.perform(get("/api/auth/profile")
                 .header("Authorization", "Bearer invalid.token.str"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.status").value(401));
     }
 
     @Test
-    @DisplayName("POST /api/admin/login - Invalid credentials should return 400 Bad Request")
+    @DisplayName("POST /api/auth/login - Invalid credentials should return 400 Bad Request")
     void testLoginInvalidCredentials() throws Exception {
         AdminLoginRequest request = new AdminLoginRequest("wrong@email.com", "wrongpassword");
 
-        mockMvc.perform(post("/api/admin/login")
+        mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -154,11 +154,11 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/admin/login - Valid Super Admin login returns token and permissions array")
+    @DisplayName("POST /api/auth/login - Valid Super Admin login returns token and permissions array")
     void testLoginSuperAdminSuccess() throws Exception {
         AdminLoginRequest request = new AdminLoginRequest("lthdang@ninepoints.vn", "Password123!");
 
-        mockMvc.perform(post("/api/admin/login")
+        mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -168,7 +168,7 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/admin/register - Super Admin can register sub-admin with type = SUB_ADMIN")
+    @DisplayName("POST /api/auth/register - Super Admin can register sub-admin with type = SUB_ADMIN")
     void testRegisterAdminBySuperAdminSuccess() throws Exception {
         String uniqueEmail = "newsubadmin_" + UUID.randomUUID() + "@test.com";
         AdminRequestDTO request = AdminRequestDTO.builder()
@@ -178,7 +178,7 @@ class AdminControllerTest {
                 .password("SecurePass123!")
                 .build();
 
-        mockMvc.perform(post("/api/admin/register")
+        mockMvc.perform(post("/api/auth/register")
                 .header("Authorization", "Bearer " + superAdminToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -188,7 +188,7 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("POST /api/admin/register - Unauthenticated request returns 401 Unauthorized")
+    @DisplayName("POST /api/auth/register - Unauthenticated request returns 401 Unauthorized")
     void testRegisterAdminUnauthenticated() throws Exception {
         AdminRequestDTO request = AdminRequestDTO.builder()
                 .email("unauth_" + UUID.randomUUID() + "@test.com")
@@ -197,14 +197,14 @@ class AdminControllerTest {
                 .password("SecurePass123!")
                 .build();
 
-        mockMvc.perform(post("/api/admin/register")
+        mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
-    @DisplayName("POST /api/admin/register - Sub Admin without permission returns 403 Forbidden")
+    @DisplayName("POST /api/auth/register - Sub Admin without permission returns 403 Forbidden")
     void testRegisterAdminBySubAdminForbidden() throws Exception {
         AdminRequestDTO request = AdminRequestDTO.builder()
                 .email("forbidden_" + UUID.randomUUID() + "@test.com")
@@ -213,7 +213,7 @@ class AdminControllerTest {
                 .password("SecurePass123!")
                 .build();
 
-        mockMvc.perform(post("/api/admin/register")
+        mockMvc.perform(post("/api/auth/register")
                 .header("Authorization", "Bearer " + subAdminToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -222,18 +222,18 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/admin/sub-admins - Super Admin can retrieve list of sub-admins")
+    @DisplayName("GET /api/auth/sub-admins - Super Admin can retrieve list of sub-admins")
     void testGetSubAdminsBySuperAdmin() throws Exception {
-        mockMvc.perform(get("/api/admin/sub-admins")
+        mockMvc.perform(get("/api/auth/sub-admins")
                 .header("Authorization", "Bearer " + superAdminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());
     }
 
     @Test
-    @DisplayName("GET /api/admin/sub-admins/{id} - Super Admin gets sub-admin details with permissions")
+    @DisplayName("GET /api/auth/sub-admins/{id} - Super Admin gets sub-admin details with permissions")
     void testGetSubAdminDetailSuccess() throws Exception {
-        mockMvc.perform(get("/api/admin/sub-admins/" + subAdmin.getId())
+        mockMvc.perform(get("/api/auth/sub-admins/" + subAdmin.getId())
                 .header("Authorization", "Bearer " + superAdminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(subAdmin.getId().toString()))
@@ -242,15 +242,15 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("GET /api/admin/sub-admins/{id} - Invalid or Non-SUB_ADMIN ID returns 404 Not Found")
+    @DisplayName("GET /api/auth/sub-admins/{id} - Invalid or Non-SUB_ADMIN ID returns 404 Not Found")
     void testGetSubAdminDetailNotFound() throws Exception {
-        mockMvc.perform(get("/api/admin/sub-admins/" + UUID.randomUUID())
+        mockMvc.perform(get("/api/auth/sub-admins/" + UUID.randomUUID())
                 .header("Authorization", "Bearer " + superAdminToken))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    @DisplayName("DELETE /api/admin/sub-admins/{id} - Super Admin soft deletes sub-admin")
+    @DisplayName("DELETE /api/auth/sub-admins/{id} - Super Admin soft deletes sub-admin")
     void testDeleteSubAdminSuccess() throws Exception {
         String email = "to_delete_" + UUID.randomUUID() + "@test.com";
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
@@ -266,7 +266,7 @@ class AdminControllerTest {
         adminToDelete.setUpdatedAt(now);
         Admin toDelete = adminRepository.save(adminToDelete);
 
-        mockMvc.perform(delete("/api/admin/sub-admins/" + toDelete.getId())
+        mockMvc.perform(delete("/api/auth/sub-admins/" + toDelete.getId())
                 .header("Authorization", "Bearer " + superAdminToken))
                 .andExpect(status().isOk());
 
@@ -276,19 +276,19 @@ class AdminControllerTest {
     }
 
     @Test
-    @DisplayName("DELETE /api/admin/sub-admins/{id} - Attempt to delete SUPER_ADMIN returns 400 Bad Request")
+    @DisplayName("DELETE /api/auth/sub-admins/{id} - Attempt to delete SUPER_ADMIN returns 400 Bad Request")
     void testDeleteSuperAdminBadRequest() throws Exception {
-        mockMvc.perform(delete("/api/admin/sub-admins/" + superAdmin.getId())
+        mockMvc.perform(delete("/api/auth/sub-admins/" + superAdmin.getId())
                 .header("Authorization", "Bearer " + superAdminToken))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
-    @DisplayName("PUT /api/admin/sub-admins/{id}/permissions - Full replace permissions with invalid ID returns 400")
+    @DisplayName("PUT /api/auth/sub-admins/{id}/permissions - Full replace permissions with invalid ID returns 400")
     void testReplaceSubAdminPermissionsInvalidId() throws Exception {
         UpdateSubAdminPermissionsRequest request = new UpdateSubAdminPermissionsRequest(List.of(999999L));
 
-        mockMvc.perform(put("/api/admin/sub-admins/" + subAdmin.getId() + "/permissions")
+        mockMvc.perform(put("/api/auth/sub-admins/" + subAdmin.getId() + "/permissions")
                 .header("Authorization", "Bearer " + superAdminToken)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
@@ -360,7 +360,6 @@ class AdminControllerTest {
 
         UpdatePermissionRequest updateReq = UpdatePermissionRequest.builder()
                 .name("Updated Permission Name")
-                .permissionCode("permission.updated_" + UUID.randomUUID())
                 .endpoint("/api/new-endpoint")
                 .build();
 
@@ -378,8 +377,6 @@ class AdminControllerTest {
     void testUpdatePermissionNotFound() throws Exception {
         UpdatePermissionRequest updateReq = UpdatePermissionRequest.builder()
                 .name("Updated Name")
-                .permissionCode("permission.test_code_" + UUID.randomUUID())
-                .endpoint("/api/test")
                 .build();
 
         mockMvc.perform(put("/api/permissions/999999")
