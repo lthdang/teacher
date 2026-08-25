@@ -67,6 +67,12 @@ public class GlobalExceptionHandler {
     return respond(HttpStatus.FORBIDDEN, resolveException(ex), request);
   }
 
+  @ExceptionHandler(UnauthorizedException.class)
+  public ResponseEntity<ResponseDTO<?>> handleUnauthorizedException(
+      UnauthorizedException ex, HttpServletRequest request) {
+    return respond(HttpStatus.UNAUTHORIZED, resolveException(ex), request);
+  }
+
   @ExceptionHandler(UnexpectedException.class)
   public ResponseEntity<ResponseDTO<?>> handleUnexpectedException(
       UnexpectedException ex, HttpServletRequest request) {

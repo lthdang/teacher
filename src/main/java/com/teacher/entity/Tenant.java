@@ -3,6 +3,9 @@ package com.teacher.entity;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -42,6 +45,7 @@ public class Tenant {
     @Column(name = "province_code", length = 2)
     private String provinceCode;
 
+    @JdbcTypeCode(SqlTypes.JSON)
     @Column(name = "settings", columnDefinition = "jsonb", nullable = false)
     private String settings;
 

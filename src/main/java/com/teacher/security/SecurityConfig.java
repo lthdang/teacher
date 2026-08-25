@@ -45,9 +45,9 @@ public class SecurityConfig {
                 // Allow all CORS OPTIONS preflight requests
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Admin login is public
-                .requestMatchers(HttpMethod.POST, "/api/admin/login", "/api/auth/login").permitAll()
-                // All other admin, auth, and permissions endpoints require a valid JWT
-                .requestMatchers("/api/admin/**", "/api/auth/**", "/api/permissions/**", "/api/permissions").authenticated()
+                .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
+                // All other admin, auth, permissions, and roles endpoints require a valid JWT
+                .requestMatchers("/api/auth/**", "/api/permissions/**", "/api/permissions", "/api/roles/**", "/api/roles").authenticated()
                 // Everything else is open (other future routes)
                 .anyRequest().permitAll())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

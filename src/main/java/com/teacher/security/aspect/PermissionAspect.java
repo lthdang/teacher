@@ -1,5 +1,6 @@
 package com.teacher.security.aspect;
 
+import java.util.Map;
 import java.util.UUID;
 
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -9,6 +10,8 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import com.teacher.common.constant.ErrorCode;
+import com.teacher.common.exception.BadRequestException;
 import com.teacher.common.exception.ForbiddenException;
 import com.teacher.common.exception.UnauthorizedException;
 import com.teacher.entity.Admin;
@@ -48,7 +51,7 @@ public class PermissionAspect {
 
         boolean hasPermission = adminService.hasPermission(adminId, requirePermission.value());
         if (!hasPermission) {
-            throw new ForbiddenException("Access denied: Missing required permission '" + requirePermission.value() + "'");
+            throw new ForbiddenException(ErrorCode.ERROR_PERMISSION_DENIED);
         }
 
         return joinPoint.proceed();

@@ -3,6 +3,7 @@ package com.teacher.service;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -11,12 +12,13 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.teacher.common.constant.ErrorCode;
 import com.teacher.common.exception.BadRequestException;
 import com.teacher.common.exception.NotFoundException;
+import com.teacher.common.service.BaseService;
 import com.teacher.common.util.DTOMapper;
 import com.teacher.dto.permission.AffectedPermissionSummary;
 import com.teacher.dto.permission.CreatePermissionItemRequest;
-import com.teacher.dto.permission.DeletePermissionsRequest;
 import com.teacher.dto.permission.DeletePermissionsResponse;
 import com.teacher.dto.permission.PermissionDTO;
 import com.teacher.dto.permission.UpdatePermissionRequest;
@@ -28,11 +30,31 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class PermissionService {
+public class PermissionService extends BaseService<Permission, Long>  {
 
     private final IPermissionRepository permissionRepository;
     private final IAdminPermissionRepository adminPermissionRepository;
     private final DTOMapper dtoMapper;
+
+    @Override
+    public Optional<Permission> findById(Long id) {
+        return permissionRepository.findById(id);
+    }
+
+    @Override
+    public List<Permission> findAllById(Collection<Long> ids) {
+        return permissionRepository.findAllById(ids);
+    }
+
+    @Override
+    public String notFoundByIdErrorCode() {
+        return ErrorCode.ERROR_USER_NOT_FOUND;
+    }
+
+    @Override
+    public String notFoundByIdsErrorCode() {
+        return ErrorCode.ERROR_SOME_USERS_NOT_FOUND;
+    }
 
     public List<PermissionDTO> getAllPermissions(Integer page, Integer size) {
         List<Permission> permissions = permissionRepository.findAll();
@@ -48,32 +70,21 @@ public class PermissionService {
     @Transactional
     public List<PermissionDTO> createPermissions(List<CreatePermissionItemRequest> requests) {
         if (requests == null || requests.isEmpty()) {
-            throw new BadRequestException("Request list must not be empty");
+            return List.of();
         }
 
-        Set<String> codeSetInRequest = new HashSet<>();
-        List<String> duplicateCodesInRequest = new ArrayList<>();
-
-        for (CreatePermissionItemRequest item : requests) {
-            if (!codeSetInRequest.add(item.getPermissionCode())) {
-                duplicateCodesInRequest.add(item.getPermissionCode());
+        Set<String> seenCodes = new HashSet<>();
+        for (CreatePermissionItemRequest req : requests) {
+            if (!seenCodes.add(req.getPermissionCode())) {
+                throw new BadRequestException("Duplicate permission code in request: " + req.getPermissionCode());
+            }
+            if (permissionRepository.existsByPermissionCode(req.getPermissionCode())) {
+                throw new BadRequestException("Permission code already exists in database: " + req.getPermissionCode());
             }
         }
 
-        List<String> existingCodesInDb = requests.stream()
-                .map(CreatePermissionItemRequest::getPermissionCode)
-                .filter(permissionRepository::existsByPermissionCode)
-                .toList();
-
-        Set<String> allDuplicates = new HashSet<>(duplicateCodesInRequest);
-        allDuplicates.addAll(existingCodesInDb);
-
-        if (!allDuplicates.isEmpty()) {
-            throw new BadRequestException("Duplicate permission codes found: " + allDuplicates);
-        }
-
         OffsetDateTime now = OffsetDateTime.now(ZoneOffset.UTC);
-        List<Permission> newPermissions = requests.stream()
+        List<Permission> permissions = requests.stream()
                 .map(req -> Permission.builder()
                         .name(req.getName())
                         .permissionCode(req.getPermissionCode())
@@ -83,40 +94,32 @@ public class PermissionService {
                         .build())
                 .toList();
 
-        List<Permission> savedPermissions = permissionRepository.saveAll(newPermissions);
-        return dtoMapper.map(savedPermissions, PermissionDTO.class);
+        List<Permission> saved = permissionRepository.saveAll(permissions);
+        return dtoMapper.map(saved, PermissionDTO.class);
     }
 
     @Transactional
-    public DeletePermissionsResponse deletePermissions(DeletePermissionsRequest request) {
-        List<Long> requestedIds = request.getPermissionIds();
-        List<AffectedPermissionSummary> deletedSummaries = new ArrayList<>();
+    public DeletePermissionsResponse deletePermissions(List<Long> permissionIds) {
+        List<AffectedPermissionSummary> deletedList = new ArrayList<>();
         List<Long> notFoundIds = new ArrayList<>();
 
-        for (Long id : requestedIds) {
-            Optional<Permission> permissionOpt = permissionRepository.findById(id);
-            if (permissionOpt.isEmpty()) {
-                notFoundIds.add(id);
-            } else {
-                Permission p = permissionOpt.get();
-                long affectedAdmins = adminPermissionRepository.countByPermissionId(id);
-
-                // Cascade delete junction links
-                adminPermissionRepository.deleteByPermissionId(id);
-
-                // Delete permission
-                permissionRepository.deleteById(id);
-
-                deletedSummaries.add(AffectedPermissionSummary.builder()
-                        .id(p.getId())
-                        .permissionCode(p.getPermissionCode())
-                        .affectedAdminsCount(affectedAdmins)
-                        .build());
+        if (permissionIds != null) {
+            for (Long id : permissionIds) {
+                Optional<Permission> permissionOpt = permissionRepository.findById(id);
+                if (permissionOpt.isPresent()) {
+                    Permission p = permissionOpt.get();
+                    long count = adminPermissionRepository.countByPermissionId(id);
+                    adminPermissionRepository.deleteByPermissionId(id);
+                    permissionRepository.delete(p);
+                    deletedList.add(new AffectedPermissionSummary(id, p.getPermissionCode(), count));
+                } else {
+                    notFoundIds.add(id);
+                }
             }
         }
 
         return DeletePermissionsResponse.builder()
-                .deletedPermissions(deletedSummaries)
+                .deletedPermissions(deletedList)
                 .notFoundIds(notFoundIds)
                 .build();
     }
@@ -125,16 +128,12 @@ public class PermissionService {
     public PermissionDTO updatePermission(Long id, UpdatePermissionRequest request) {
         Permission permission = permissionRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Permission not found"));
-
-        if (!permission.getPermissionCode().equals(request.getPermissionCode())) {
-            if (permissionRepository.existsByPermissionCode(request.getPermissionCode())) {
-                throw new BadRequestException("Permission code already exists: " + request.getPermissionCode());
-            }
+        if (request.getName() != null) {
+            permission.setName(request.getName());
         }
-
-        permission.setName(request.getName());
-        permission.setPermissionCode(request.getPermissionCode());
-        permission.setEndpoint(request.getEndpoint());
+        if (request.getEndpoint() != null) {
+            permission.setEndpoint(request.getEndpoint());
+        }
         permission.setUpdatedAt(OffsetDateTime.now(ZoneOffset.UTC));
 
         Permission updatedPermission = permissionRepository.save(permission);
