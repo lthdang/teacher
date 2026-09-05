@@ -18,4 +18,11 @@ public interface IUserTenantRoleRepository extends JpaRepository<UserTenantRole,
     default boolean existsByRoleId(UUID roleId) {
         return countByRoleId(roleId) > 0;
     }
+
+    @Query("SELECT COUNT(utr) FROM UserTenantRole utr WHERE utr.tenant.id = :tenantId")
+    long countByTenantId(@Param("tenantId") UUID tenantId);
+
+    default boolean existsByTenantId(UUID tenantId) {
+        return countByTenantId(tenantId) > 0;
+    }
 }

@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.4 — Create Roles Table
+-- V0.0.3 — Create Roles Table
 -- Level 1: RBAC — Role definitions shared across the system
 -- Roles can be system-managed (is_system_role = true, immutable by tenants)
 -- or tenant-created (is_system_role = false, customizable per tenant).

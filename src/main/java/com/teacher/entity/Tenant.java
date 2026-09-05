@@ -6,6 +6,8 @@ import java.util.UUID;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import com.teacher.common.interfaces.IModel;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -25,7 +27,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Tenant {
+public class Tenant implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -38,7 +40,7 @@ public class Tenant {
     @Column(name = "slug", nullable = false, unique = true, length = 100)
     private String slug;
 
-    @Column(name = "school_level", nullable = false, columnDefinition = "school_level")
+    @Column(name = "school_level", nullable = false)
     @Enumerated(EnumType.STRING)
     private SchoolLevel schoolLevel;
 

@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.6 — Create User Tenant Roles Table
+-- V0.0.5 — Create User Tenant Roles Table
 -- Level 1: RBAC — User operating rights at each tenant
 -- A user can hold multiple roles at the same tenant; one role is marked primary.
 -- Roles are time-bounded (valid_from / valid_until) and support revocation audit.

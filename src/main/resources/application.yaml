@@ -10,6 +10,7 @@ spring:
 
   flyway:
     baseline-on-migrate: true
+    baseline-version: 0.0.0
     enabled: true
     default-schema: "${teacher.db.default_schema}"
     schemas: "${teacher.db.default_schema}"
@@ -50,4 +51,4 @@ teacher:
     user: "${POSTGRES_USER:root}"
     password: "${POSTGRES_PASSWORD:password}"
     default_schema: teacher
-    url: jdbc:postgresql://${teacher.db.host}:${teacher.db.port}/${teacher.db.name}
+    url: jdbc:postgresql://${teacher.db.host}:${teacher.db.port}/${teacher.db.name}?stringtype=unspecified

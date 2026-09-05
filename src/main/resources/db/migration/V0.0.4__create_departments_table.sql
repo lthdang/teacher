@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.5 — Create Departments Table
+-- V0.0.4 — Create Departments Table
 -- Level 1: Organizational structure within a tenant
 -- Departments are scoped to a tenant; manager is a user within the system.
 -- =============================================================================

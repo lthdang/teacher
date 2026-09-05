@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.8 — Create User Role Contexts Table
+-- V0.0.7 — Create User Role Contexts Table
 -- Level 1: Scoped role assignments within a tenant
 -- Binds a user_tenant_role to a specific operational context
 -- (e.g., a particular class, department, or project).
