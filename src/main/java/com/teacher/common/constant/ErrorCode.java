@@ -20,6 +20,11 @@ public class ErrorCode implements IBaseErrorCode {
   public static final String ERROR_ROLE_CODE_EXISTED = "ERROR_ROLE_CODE_EXISTED";
   public static final String ERROR_CANNOT_DELETE_SYSTEM_ROLE = "ERROR_CANNOT_DELETE_SYSTEM_ROLE";
   public static final String ERROR_ROLE_IN_USE = "ERROR_ROLE_IN_USE";
+  // TENANT
+  public static final String ERROR_NOT_FOUND_TENANT_BY_ID = "ERROR_NOT_FOUND_TENANT_BY_ID";
+  public static final String ERROR_NOT_FOUND_SOME_TENANTS_BY_ID = "ERROR_NOT_FOUND_SOME_TENANTS_BY_ID";
+  public static final String ERROR_TENANT_SLUG_EXISTED = "ERROR_TENANT_SLUG_EXISTED";
+  public static final String ERROR_TENANT_IN_USE = "ERROR_TENANT_IN_USE";
 
   private static final Map<String, String> messages =
       ImmutableMap.<String, String>builder()
@@ -34,6 +39,10 @@ public class ErrorCode implements IBaseErrorCode {
           .put(ERROR_ROLE_CODE_EXISTED, "Role code already exists")
           .put(ERROR_CANNOT_DELETE_SYSTEM_ROLE, "System roles cannot be deleted")
           .put(ERROR_ROLE_IN_USE, "Cannot delete role because it is currently assigned to users")
+          .put(ERROR_NOT_FOUND_TENANT_BY_ID, "Tenant could not be found by id: {{id}}")
+          .put(ERROR_NOT_FOUND_SOME_TENANTS_BY_ID, "Some tenants could not be found by ids: {{ids}}")
+          .put(ERROR_TENANT_SLUG_EXISTED, "Tenant slug already exists")
+          .put(ERROR_TENANT_IN_USE, "Cannot delete tenant because it is currently assigned to users or departments")
           .build();
 
   @Override

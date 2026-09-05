@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.3 — Create Users Table
+-- V0.0.2 — Create Users Table
 -- Level 1: Core identity — global login accounts across all tenants
 -- A user belongs to the system globally; tenant association is managed
 -- through user_tenant_roles.
@@ -14,7 +14,7 @@ CREATE TABLE users (
     full_name     VARCHAR(255) NOT NULL,
     phone         VARCHAR(20),
     -- Controls user access; new accounts start as Pending
-    status        user_status  NOT NULL DEFAULT 'Pending',
+    status        VARCHAR(20)  NOT NULL DEFAULT 'Pending',
     last_login_at TIMESTAMPTZ,
     created_at    TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
     update_at     TIMESTAMPTZ  NOT NULL DEFAULT NOW()

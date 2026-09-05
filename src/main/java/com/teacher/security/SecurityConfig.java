@@ -46,8 +46,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 // Admin login is public
                 .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
-                // All other admin, auth, permissions, and roles endpoints require a valid JWT
-                .requestMatchers("/api/auth/**", "/api/permissions/**", "/api/permissions", "/api/roles/**", "/api/roles").authenticated()
+                // All other admin, auth, permissions, roles, and tenants endpoints require a valid JWT
+                .requestMatchers("/api/auth/**", "/api/permissions/**", "/api/permissions", "/api/roles/**", "/api/roles", "/api/tenants/**", "/api/tenants", "/tenants/**", "/tenants").authenticated()
                 // Everything else is open (other future routes)
                 .anyRequest().permitAll())
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

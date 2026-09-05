@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.9 — Seed System Roles
+-- V0.0.8 — Seed System Roles
 -- Level 1: Initial RBAC role definitions
 -- These are system-managed roles (is_system_role = true) and cannot be
 -- deleted or modified by tenants. Permissions use a dot-notation key model.

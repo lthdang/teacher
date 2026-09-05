@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.7 — Create User Career Ranks Table
+-- V0.0.6 — Create User Career Ranks Table
 -- Level 1: Professional rank history for users (system-level, cross-tenant)
 -- Tracks the progression of a user's professional role over time.
 -- Only one career rank is active per user at any time (is_current = true).

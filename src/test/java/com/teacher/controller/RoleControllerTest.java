@@ -151,6 +151,18 @@ class RoleControllerTest {
     }
 
     @Test
+    @DisplayName("GET /api/roles - Default call without params returns 200 OK with default pagination")
+    void testGetRolesNoParams() throws Exception {
+        mockMvc.perform(get("/api/roles")
+                .header("Authorization", "Bearer " + superAdminToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.page").value(0))
+                .andExpect(jsonPath("$.limit").value(10))
+                .andExpect(jsonPath("$.totalRecords").exists())
+                .andExpect(jsonPath("$.data").isArray());
+    }
+
+    @Test
     @DisplayName("GET /api/roles - Search keyword filters results correctly")
     void testGetRolesWithSearch() throws Exception {
         String uniqueCode = "SEARCH_ROLE_" + UUID.randomUUID().toString().substring(0, 8);

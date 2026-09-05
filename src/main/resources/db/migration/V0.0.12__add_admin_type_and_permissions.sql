@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.13 — Add Admin Type and Permissions
+-- V0.0.12 — Add Admin Type and Permissions
 -- Distinguishes access rights between SUPER_ADMIN and SUB_ADMIN.
 -- Creates permission and admin_permission tables.
 -- =============================================================================

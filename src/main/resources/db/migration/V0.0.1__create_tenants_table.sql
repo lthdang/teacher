@@ -1,8 +1,11 @@
 -- =============================================================================
--- V0.0.2 — Create Tenants Table
+-- V0.0.1 — Create Tenants Table
 -- Level 1: Multi-tenant foundation
 -- Each tenant represents a school in the multi-tenant architecture
 -- =============================================================================
+
+-- Enable UUID generation support
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE tenants (
     id            UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -10,7 +13,7 @@ CREATE TABLE tenants (
     -- URL-friendly identifier used in routing and API calls
     slug          VARCHAR(100) NOT NULL UNIQUE,
     -- Controls feature enablement based on grade level
-    school_level  school_level NOT NULL,
+    school_level  VARCHAR(50) NOT NULL,
     -- Province code per Ministry of Education standard (e.g., 01 = Hanoi, 79 = HCM)
     province_code CHAR(2),
     -- Flexible per-school configuration (logo, theme, timezone, school_year_start, etc.)

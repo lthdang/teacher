@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.16 — Seed Role Permissions
+-- V0.0.15 — Seed Role Permissions
 -- Inserts role management permissions into the permission catalog.
 -- =============================================================================
 

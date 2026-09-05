@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.11 — Create Admin Table
+-- V0.0.10 — Create Admin Table
 -- Separates system administrator identity from the general user table.
 -- Admin accounts are managed independently and authenticate via JWT.
 -- =============================================================================

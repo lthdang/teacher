@@ -70,7 +70,12 @@ public class RoleService extends BaseService<Role, UUID> {
         int pageSize = (limit != null && limit > 0) ? limit : 10;
 
         Pageable pageable = PageRequest.of(pageIndex, pageSize, Sort.by(Sort.Direction.DESC, "createdAt"));
-        Page<Role> rolePage = roleRepository.searchRoles(search, pageable);
+        Page<Role> rolePage;
+        if (search != null && !search.trim().isEmpty()) {
+            rolePage = roleRepository.searchRoles(search.trim(), pageable);
+        } else {
+            rolePage = roleRepository.findAll(pageable);
+        }
 
         return dtoMapper.mapSearchResult(rolePage, RoleDTO.class);
     }

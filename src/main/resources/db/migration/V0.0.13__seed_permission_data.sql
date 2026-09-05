@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.14 — Seed Permission Data
+-- V0.0.13 — Seed Permission Data
 -- Inserts initial permission catalog records into the permission table.
 -- =============================================================================
 

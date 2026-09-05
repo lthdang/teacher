@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.12 — Migrate Admin Data and Cleanup
+-- V0.0.11 — Migrate Admin Data and Cleanup
 -- Copies the seeded system administrator account from the users table into the
 -- new admin table, then removes it from users so admin identity is fully
 -- separated from general user accounts.

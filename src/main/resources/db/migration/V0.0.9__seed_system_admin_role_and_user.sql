@@ -1,5 +1,5 @@
 -- =============================================================================
--- V0.0.10 — Seed System Admin Role and User
+-- V0.0.9 — Seed System Admin Role and User
 -- Level 1: Bootstrap system-level administrator account
 -- Adds a SYSTEM_ADMIN role (hierarchy_level = 7, above PRINCIPAL = 6) and
 -- seeds the initial system administrator user with a BCrypt-hashed password.
