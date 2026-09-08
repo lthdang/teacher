@@ -3,6 +3,8 @@ package com.teacher.entity;
 import java.time.OffsetDateTime;
 import java.util.UUID;
 
+import com.teacher.common.interfaces.IModel;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class User {
+public class User implements IModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -41,7 +43,7 @@ public class User {
     @Column(name = "phone", length = 20)
     private String phone;
 
-    @Column(name = "status", nullable = false, columnDefinition = "user_status")
+    @Column(name = "status", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private UserStatus status;
 

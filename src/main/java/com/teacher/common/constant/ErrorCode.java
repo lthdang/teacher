@@ -26,6 +26,10 @@ public class ErrorCode implements IBaseErrorCode {
   public static final String ERROR_TENANT_SLUG_EXISTED = "ERROR_TENANT_SLUG_EXISTED";
   public static final String ERROR_TENANT_IN_USE = "ERROR_TENANT_IN_USE";
 
+  // USER
+  public static final String ERROR_NOT_FOUND_USER_BY_ID = "ERROR_NOT_FOUND_USER_BY_ID";
+  public static final String ERROR_NOT_FOUND_SOME_USERS_BY_ID = "ERROR_NOT_FOUND_SOME_USERS_BY_ID";
+
   private static final Map<String, String> messages =
       ImmutableMap.<String, String>builder()
           .put(ERROR_USERNAME_IS_REQUIRED, "Username is required")
@@ -43,6 +47,8 @@ public class ErrorCode implements IBaseErrorCode {
           .put(ERROR_NOT_FOUND_SOME_TENANTS_BY_ID, "Some tenants could not be found by ids: {{ids}}")
           .put(ERROR_TENANT_SLUG_EXISTED, "Tenant slug already exists")
           .put(ERROR_TENANT_IN_USE, "Cannot delete tenant because it is currently assigned to users or departments")
+          .put(ERROR_NOT_FOUND_USER_BY_ID, "User could not be found by id: {{id}}")
+          .put(ERROR_NOT_FOUND_SOME_USERS_BY_ID, "Some users could not be found by ids: {{ids}}")
           .build();
 
   @Override
